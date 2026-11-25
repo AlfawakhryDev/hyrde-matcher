@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/AlfawakhryDev/hyrde-api/internal/events"
-	"github.com/AlfawakhryDev/hyrde-api/internal/match"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/events"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/match"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"

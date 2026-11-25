@@ -13,9 +13,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/AlfawakhryDev/hyrde-api/internal/env"
-	"github.com/AlfawakhryDev/hyrde-api/internal/events"
-	"github.com/AlfawakhryDev/hyrde-api/internal/store"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/env"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/events"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/store"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/twmb/franz-go/pkg/kgo"

@@ -9,9 +9,9 @@ import (
 	"log"
 	"math/rand/v2"
 
-	"github.com/AlfawakhryDev/hyrde-api/internal/env"
-	"github.com/AlfawakhryDev/hyrde-api/internal/match"
-	"github.com/AlfawakhryDev/hyrde-api/internal/store"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/env"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/match"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/store"
 )
 
 var skills = []string{"Procore", "QuickBooks", "AppFolio", "Yardi", "Buildium", "Sage Intacct", "Autodesk Construction Cloud", "DocuSign", "Stripe", "Plaid", "Receipt OCR", "Salesforce"}

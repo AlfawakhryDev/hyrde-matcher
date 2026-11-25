@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AlfawakhryDev/hyrde-api/internal/events"
-	"github.com/AlfawakhryDev/hyrde-api/internal/match"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/events"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/match"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

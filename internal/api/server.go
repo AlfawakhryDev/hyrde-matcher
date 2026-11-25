@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/AlfawakhryDev/hyrde-api/internal/events"
-	"github.com/AlfawakhryDev/hyrde-api/internal/match"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/events"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/match"
 )
 
 // Publisher is the slice of the Kafka producer the API needs. Defining the

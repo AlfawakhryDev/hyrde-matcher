@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AlfawakhryDev/hyrde-api/internal/match"
-	"github.com/AlfawakhryDev/hyrde-api/internal/store"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/match"
+	"github.com/AlfawakhryDev/hyrde-matcher/internal/store"
 )
 
 const (

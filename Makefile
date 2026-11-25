@@ -26,7 +26,7 @@ load:            ## latency percentiles under load
 
 kind-up:         ## the same services on a local Kubernetes cluster
 	kind create cluster --name hyrde --wait 120s
-	docker network connect go-api_default hyrde-control-plane
+	docker network connect hyrde_default hyrde-control-plane
 	docker build -t hyrde-matcher:dev --build-arg SERVICE=matcher .
 	docker build -t hyrde-statsd:dev --build-arg SERVICE=statsd .
 	kind load docker-image hyrde-matcher:dev --name hyrde

@@ -1,4 +1,4 @@
-module github.com/AlfawakhryDev/hyrde-api
+module github.com/AlfawakhryDev/hyrde-matcher
 
 go 1.27.4
 
