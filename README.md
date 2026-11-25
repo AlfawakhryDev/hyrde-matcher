@@ -8,13 +8,13 @@ events.
 
 ```mermaid
 flowchart LR
-    web[Hyrde web app] -- POST /v1/match --> matcher
-    web -- POST /v1/events --> matcher
-    matcher -- milestone events --> kafka[(Kafka)]
-    matcher -. match.served audit, async .-> kafka
-    kafka --> statsd
-    statsd -- exactly-once counters --> ddb[(DynamoDB)]
-    ddb -- snapshot every few seconds --> matcher
+    web["Hyrde web app"] -->|"POST /v1/match"| matcher["matcher"]
+    web -->|"POST /v1/events"| matcher
+    matcher -->|"milestone events"| kafka[("Kafka")]
+    matcher -.->|"match.served audit (async)"| kafka
+    kafka --> statsd["statsd"]
+    statsd -->|"exactly-once counters"| ddb[("DynamoDB")]
+    ddb -->|"snapshot every few seconds"| matcher
 ```
 
 ## What happens on a request
