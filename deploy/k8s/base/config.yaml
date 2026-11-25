@@ -1,0 +1,23 @@
+# Non-secret settings. In AWS: Kafka is MSK, DynamoDB is the real service
+# (no endpoint override), and credentials come from the service account's IAM
+# role (IRSA), never from keys in the cluster.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hyrde-config
+data:
+  AWS_REGION: us-east-1
+  KAFKA_BROKERS: b-1.hyrde-msk.example:9092,b-2.hyrde-msk.example:9092
+  EVENTS_TOPIC: hyrde.milestone-events
+  DECISIONS_TOPIC: hyrde.match-decisions
+  TABLE_PREFIX: hyrde_
+  REFRESH_INTERVAL: 5s
+---
+# Create the real one out of band:
+#   kubectl -n hyrde create secret generic hyrde-api --from-literal=API_TOKEN=...
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hyrde-api
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/hyrde-api-dynamodb

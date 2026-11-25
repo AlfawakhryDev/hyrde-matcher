@@ -1,0 +1,43 @@
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version-file: go.mod }
+      - name: Format and vet
+        run: make lint
+      - name: Unit tests (race detector)
+        run: make race
+      - name: Benchmark (reported, not gated)
+        run: make bench
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version-file: go.mod }
+      - name: Start Kafka, DynamoDB, matcher and statsd
+        run: make up
+      - name: End-to-end test
+        run: make e2e
+      - name: Latency under load
+        run: make seed && make load
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
+
+  k8s:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render manifests
+        run: |
+          kubectl kustomize deploy/k8s/base > /dev/null
+          kubectl kustomize deploy/k8s/local > /dev/null

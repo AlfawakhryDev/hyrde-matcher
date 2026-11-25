@@ -1,0 +1,16 @@
+# Production (EKS + MSK + DynamoDB): kubectl apply -k deploy/k8s/base
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hyrde
+resources:
+  - namespace.yaml
+  - config.yaml
+  - matcher.yaml
+  - statsd.yaml
+images:
+  - name: hyrde-matcher
+    newName: ghcr.io/alfawakhrydev/hyrde-matcher
+    newTag: latest
+  - name: hyrde-statsd
+    newName: ghcr.io/alfawakhrydev/hyrde-statsd
+    newTag: latest

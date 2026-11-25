@@ -1,0 +1,42 @@
+# Everything the services need, locally: `docker compose up --build`.
+services:
+  dynamodb:
+    image: amazon/dynamodb-local:2.6.1
+    command: ["-jar", "DynamoDBLocal.jar", "-inMemory", "-sharedDb"]
+    ports: ["8000:8000"]
+
+  kafka:
+    # Redpanda speaks the Kafka protocol in one container, with no ZooKeeper.
+    image: redpandadata/redpanda:v24.2.18
+    command: >
+      redpanda start --mode dev-container --smp 1 --overprovisioned
+      --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      --advertise-kafka-addr internal://kafka:9092,external://localhost:19092
+    ports: ["19092:19092"]
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health", "--exit-when-healthy"]
+      interval: 2s
+      retries: 30
+
+  matcher:
+    build: { context: ., args: { SERVICE: matcher } }
+    environment: &env
+      DYNAMODB_ENDPOINT: http://dynamodb:8000
+      KAFKA_BROKERS: kafka:9092
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local        # DynamoDB Local accepts any credentials
+      AWS_SECRET_ACCESS_KEY: local
+      API_TOKEN: dev-token
+      REFRESH_INTERVAL: 2s
+    ports: ["8080:8080"]
+    depends_on:
+      kafka: { condition: service_healthy }
+      dynamodb: { condition: service_started }
+
+  statsd:
+    build: { context: ., args: { SERVICE: statsd } }
+    environment: *env
+    ports: ["9091:9091"]
+    depends_on:
+      kafka: { condition: service_healthy }
+      dynamodb: { condition: service_started }

@@ -1,0 +1,34 @@
+# One consumer group: Kafka splits the topic's partitions across replicas, so
+# more replicas (up to the partition count) means more throughput.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: statsd
+  labels: { app: statsd }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: statsd } }
+  template:
+    metadata:
+      labels: { app: statsd }
+      annotations: { prometheus.io/scrape: "true", prometheus.io/port: "9091" }
+    spec:
+      serviceAccountName: hyrde-api
+      terminationGracePeriodSeconds: 30
+      securityContext: { runAsNonRoot: true, runAsUser: 65532, runAsGroup: 65532, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: statsd
+          image: hyrde-statsd
+          ports: [{ name: metrics, containerPort: 9091 }]
+          envFrom:
+            - configMapRef: { name: hyrde-config }
+          resources:
+            requests: { cpu: 100m, memory: 64Mi }
+            limits: { memory: 128Mi }
+          livenessProbe:
+            httpGet: { path: /healthz, port: metrics }
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }

@@ -1,0 +1,24 @@
+# A local cluster (kind) against the docker-compose Kafka and DynamoDB:
+#   make kind-up
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hyrde
+resources: [../base]
+images:
+  - { name: ghcr.io/alfawakhrydev/hyrde-matcher, newName: hyrde-matcher, newTag: dev }
+  - { name: ghcr.io/alfawakhrydev/hyrde-statsd, newName: hyrde-statsd, newTag: dev }
+patches:
+  - target: { kind: ConfigMap, name: hyrde-config }
+    patch: |
+      - { op: replace, path: /data/KAFKA_BROKERS, value: "kafka:9092" }
+      - { op: add, path: /data/DYNAMODB_ENDPOINT, value: "http://dynamodb:8000" }
+      - { op: add, path: /data/AWS_ACCESS_KEY_ID, value: "local" }
+      - { op: add, path: /data/AWS_SECRET_ACCESS_KEY, value: "local" }
+      - { op: replace, path: /data/REFRESH_INTERVAL, value: "2s" }
+  - target: { kind: Deployment }
+    patch: |
+      - { op: add, path: /spec/template/spec/containers/0/imagePullPolicy, value: Never }
+secretGenerator:
+  - name: hyrde-api
+    literals: [API_TOKEN=dev-token]
+generatorOptions: { disableNameSuffixHash: true }

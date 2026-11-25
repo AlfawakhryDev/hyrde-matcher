@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matcher
+  labels: { app: matcher }
+spec:
+  replicas: 3
+  selector: { matchLabels: { app: matcher } }
+  strategy:
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 } # never drop below capacity during a deploy
+  template:
+    metadata:
+      labels: { app: matcher }
+      annotations: { prometheus.io/scrape: "true", prometheus.io/port: "8080" }
+    spec:
+      serviceAccountName: hyrde-api
+      terminationGracePeriodSeconds: 20 # longer than the 10s graceful shutdown in main.go
+      topologySpreadConstraints: # spread replicas over zones: one zone failing leaves the rest
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: { matchLabels: { app: matcher } }
+      securityContext: { runAsNonRoot: true, runAsUser: 65532, runAsGroup: 65532, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: matcher
+          image: hyrde-matcher
+          ports: [{ name: http, containerPort: 8080 }]
+          envFrom:
+            - configMapRef: { name: hyrde-config }
+            - secretRef: { name: hyrde-api }
+          resources:
+            requests: { cpu: 250m, memory: 128Mi }
+            limits: { memory: 256Mi } # memory limit only: CPU limits throttle latency-sensitive services
+          readinessProbe: # out of the load balancer until the index is loaded and fresh
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          lifecycle:
+            preStop: { sleep: { seconds: 5 } } # let the load balancer stop routing before shutdown
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matcher
+spec:
+  selector: { app: matcher }
+  ports: [{ name: http, port: 80, targetPort: http }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: matcher
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: matcher }
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 60 } }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: matcher
+spec:
+  minAvailable: 2 # node upgrades can't take matching below two pods
+  selector: { matchLabels: { app: matcher } }
