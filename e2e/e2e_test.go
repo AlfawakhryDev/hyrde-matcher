@@ -36,10 +36,15 @@ func post(t *testing.T, path string, body any) *http.Response {
 	return resp
 }
 
-// topCandidate returns the best match, or "" while the index hasn't caught up.
+// topCandidate returns the best match, or "" while the matcher is still
+// catching up: 503 until its first snapshot loads, no candidates until the
+// snapshot includes the engineer we just wrote.
 func topCandidate(t *testing.T, skill string) (string, float64) {
 	resp := post(t, "/v1/match", map[string]any{"milestoneId": "e2e", "integrations": []string{skill}, "limit": 1})
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusServiceUnavailable {
+		return "", 0
+	}
 	var out struct {
 		Candidates []match.Candidate `json:"candidates"`
 	}
