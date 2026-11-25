@@ -12,5 +12,6 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/app ./cmd/${SERVIC
 # an attacker very little to work with. ~15 MB in total.
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/app /app
-USER 65532:65532 # numeric, so Kubernetes can verify runAsNonRoot
+# Numeric user and group, so Kubernetes can verify runAsNonRoot.
+USER 65532:65532
 ENTRYPOINT ["/app"]
