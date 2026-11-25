@@ -59,6 +59,7 @@ flowchart LR
 | Throughput, 32 concurrent clients (`make load`, Docker on a laptop) | **~29,600 req/s**, 0 failures |
 | Latency at the client, through Docker networking | p50 1.0 ms · p99 2.3 ms |
 | Latency inside the matcher (Prometheus histogram) | 97.8% under 0.5 ms · 99.7% under 1 ms |
+| Same checks on a shared 4-vCPU GitHub Actions runner (CI, every push) | 157 µs per ranking · 11,600 req/s · p99 9.2 ms |
 
 The first version scored and sorted every candidate: 477 µs and 3,042
 allocations per request. Top-K selection, a bitset instead of a map for
